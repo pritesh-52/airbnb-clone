@@ -1,0 +1,3 @@
+# Playwright diff output; baselines under tests/*-snapshots are committed.
+test-results/
+playwright-report/

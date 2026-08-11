@@ -1,0 +1,35 @@
+{
+  "name": "@airbnb-clone/api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Express API serving the listing, reviews, availability and pricing data.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "lint": "eslint . --max-warnings=0",
+    "lint:fix": "eslint . --fix",
+    "type-check": "tsc -p tsconfig.json --noEmit",
+    "test": "node --test --experimental-strip-types \"src/**/*.test.ts\"",
+    "clean": "rimraf dist .turbo"
+  },
+  "dependencies": {
+    "@airbnb-clone/types": "*",
+    "compression": "^1.8.1",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "helmet": "^8.3.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/compression": "^1.8.1",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "^22.15.3",
+    "rimraf": "^6.0.1",
+    "tsx": "^4.23.11",
+    "typescript": "^5.9.3"
+  }
+}
