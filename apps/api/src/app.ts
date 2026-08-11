@@ -1,6 +1,6 @@
 import express, { type Express } from 'express';
 import cors from 'cors';
-import helmet from 'helmet';
+import helmetImport from 'helmet';
 import compression from 'compression';
 import { env } from './config/env.js';
 import { apiRouter } from './routes/index.js';
@@ -10,6 +10,18 @@ import { notFound } from './middleware/not-found.js';
 import { errorHandler } from './middleware/error-handler.js';
 
 export const API_PREFIX = '/api/v1';
+
+/**
+ * helmet 8 publishes no `types` condition in its `exports` map and ships no
+ * `index.d.ts`. Under `moduleResolution: NodeNext` TypeScript reaches
+ * `index.d.mts` and sees a callable default, but a compiler using classic Node
+ * resolution — which some hosted build pipelines run as a second pass — falls
+ * back to the CJS namespace and reports "has no call signatures".
+ *
+ * Normalising here keeps the app compiling under either resolution.
+ */
+const helmet =
+  (helmetImport as unknown as { default?: typeof helmetImport }).default ?? helmetImport;
 
 /**
  * Builds the Express app without binding a port, so tests can drive it

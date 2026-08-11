@@ -335,6 +335,54 @@ Husky + lint-staged format and lint staged files. Set up automatically by
 
 ---
 
+## Deployment
+
+The two apps have different runtime shapes, and that drives where each belongs.
+
+### `apps/web` → Vercel
+
+Next.js on Vercel needs no config beyond project settings:
+
+| Setting          | Value                        |
+| ---------------- | ---------------------------- |
+| Root Directory   | `apps/web`                   |
+| Framework preset | Next.js (auto-detected)      |
+| Install command  | `npm install --prefix=../..` |
+
+Set `API_URL` and `NEXT_PUBLIC_API_URL` to the deployed API's base URL, and
+`NEXT_PUBLIC_LISTING_SLUG` if it differs from the default. Turbo builds
+`packages/types` first automatically.
+
+### `apps/api` → a persistent-process host (recommended)
+
+`src/index.ts` calls `app.listen()` and installs SIGTERM/SIGINT handlers to
+drain in-flight requests. That is the shape a container or VM wants — Render,
+Railway, Fly.io, ECS. Build with `npm run build`, start with `npm run start`,
+and set `CORS_ORIGINS` to the deployed web origin.
+
+### `apps/api` → Vercel functions (if you want one platform)
+
+A serverless runtime never runs a persistent listener, so `src/index.ts` is the
+wrong entry there. `src/serverless.ts` exports the Express app directly — an
+Express app _is_ a `(req, res)` handler, so no adapter is needed — and
+`api/index.js` re-exports the compiled result. `vercel.json` rewrites every path
+to that function.
+
+Set Root Directory to `apps/api`. Two caveats worth knowing:
+
+- **Cold starts.** Each invocation may boot a fresh process. Fine for this
+  read-mostly API; anything holding in-memory state would need rethinking.
+- **`api/index.js` deliberately imports from `dist/`.** Letting the platform
+  compile TypeScript itself is what produced the original
+  `helmet ... has no call signatures` failure: that pass used classic Node
+  resolution, and helmet 8 ships no `types` condition in its `exports` map and
+  no `index.d.ts`, so the callable default was never found. Importing built
+  output keeps a single compiler — ours — in the loop.
+
+I could not verify a live Vercel deploy from here, so treat the function path as
+configured-but-untested; the persistent-process path matches how the code is
+written and is the one I'd reach for.
+
 ## Known deviations from the reference
 
 Ordered by how much they matter.
